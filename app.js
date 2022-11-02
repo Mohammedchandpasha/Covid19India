@@ -111,18 +111,18 @@ app.put("/districts/:districtId/", async (request, response) => {
 app.get("/states/:stateId/stats/", async (request, response) => {
   const { stateId } = request.params;
 
-  const getStatsQuery = `SELECT * FROM district 
+  const getStatsQuery = `SELECT 
+  sum(district.cases) as totalCases,
+  sum(district.cured) as totalCured,
+  sum(district.active) as totalActive,
+  sum(district.deaths) as totalDeaths
+   FROM district 
    NATURAL JOIN state
-    WHERE district.state_id=${stateId};`;
+    WHERE district.state_id=${stateId}
+    group by district.state_id ;`;
   const sta = await db.get(getStatsQuery);
 
-  let ob = {
-    totalCases: sta.cases,
-    totalCured: sta.cured,
-    totalActive: sta.active,
-    totalDeaths: sta.deaths,
-  };
-  response.send(ob);
+  response.send(sta);
 });
 //get state name of district based on districtId API
 app.get("/districts/:districtId/details/", async (request, response) => {
